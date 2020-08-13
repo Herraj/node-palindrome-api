@@ -15,7 +15,7 @@ mongoose.connect(
     useUnifiedTopology: true
   }
 );
-//need this to access mongoose in other files
+//need this to access mongoose in other files (gloabl scope)
 mongoose.Promise = global.Promise;
 
 //configuring logger and bodyparser 
@@ -23,7 +23,7 @@ app.use(logger("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-//fix for CORS error in browser 
+//Allow access via browsers (fix for CORS error) 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
   if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
     return res.status(200).json({});
   }
   next();
@@ -42,7 +42,7 @@ app.use("/messages", messagesRoutes);
 
 //invalid route and error handling
 app.use((req, res, next) => {
-  const error = new Error("Not found");
+  const error = new Error("Invalid route. Did you mean: GET messages/");
   error.status = 404;
   next(error);
 });

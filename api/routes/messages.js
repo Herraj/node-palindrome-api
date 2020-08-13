@@ -1,24 +1,19 @@
 const express = require("express");
-const router = express.Router();
+const messageRouter = express.Router();
 
 const MessagesController =  require('../controllers/messages.js');
 /**
  * API ROUTES BELOW
  */
+ 
+ messageRouter.get("/", MessagesController.getAllMessages);
 
- //TODO: 
-router.get("/", MessagesController.getAllMessages);
+ messageRouter.get("/:messageId", MessagesController.getMessage);
 
-router.get("/:messageId", MessagesController.getMessage);
+ messageRouter.post("/", MessagesController.createMessage);
 
-router.get("/palindromes", )
+ messageRouter.patch("/:messageId", MessagesController.updateMessage);
 
-router.get("/nonpalindromes", )
+ messageRouter.delete("/:messageId", MessagesController.deleteMessage);
 
-router.post("/", MessagesController.createMessage);
-
-router.patch("/:messageId", MessagesController.updateMessage);
-
-router.delete("/:messageId", MessagesController.deleteMessage);
-
-module.exports = router;
+module.exports = messageRouter;
