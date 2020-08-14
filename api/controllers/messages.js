@@ -48,7 +48,7 @@ const getMessage = (req, res, next) => {
     })
     .catch(err => {
       console.log(err);
-      res.status(500).json({ error: "Invalid Id" });
+      res.status(400).json({ error: "Invalid Id" });
     });
 };
 
@@ -80,7 +80,7 @@ const createMessage = (req, res, next) => {
 
   }
   else {
-    res.status(500).json({ "Error": "No body with 'text' attribute" })
+    res.status(400).json({ "Error": "No body with 'text' attribute" })
 
   }
 
@@ -88,7 +88,8 @@ const createMessage = (req, res, next) => {
 };
 
 const updateMessage = (req, res, next) => {
-  if (req.body.text && Message.exists({ _id: req.params.messageId })) {
+  //check if request body contains 'text' attribute
+  if ( req.body.text ) {
     const msgId = req.params.messageId;
     const newText = req.body.text;
 
@@ -107,13 +108,13 @@ const updateMessage = (req, res, next) => {
 
   }
   else {
-    res.status(500).json({ "Error": "Invalid id or missing request body" });
+    res.status(400).json({ "Error": "missing 'text' attribute in request body" });
   }
 
 };
 
 const deleteMessage = (req, res, next) => {
-  if (Message.exists({ _id: req.params.messageId })) {
+  if (Message.exists({ _id: {$eq: req.params.messageId }})) {
     const msgId = req.params.messageId;
     Message.remove({ _id: msgId })
       .exec()
@@ -128,7 +129,7 @@ const deleteMessage = (req, res, next) => {
       });
   }
   else {
-    res.status(500).json({ error: "Message with id:" + req.params.messageId + "does not exist" });
+    res.status(400).json({ error: "Message with id:" + req.params.messageId + "does not exist" });
   }
 
 }
