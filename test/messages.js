@@ -7,6 +7,11 @@ chai.use(chaiHttp);
 //Assertion style
 chai.should();
 
+/**
+ * Testing all end points
+ * For development: run 'npm test' in console to run this test suite
+ */
+
 describe("Messages API", () => {
     /**
      * Test GET messages/

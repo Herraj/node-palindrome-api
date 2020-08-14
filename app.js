@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const messagesRoutes = require("./api/routes/messages");
 
 //set up db connection to MongoDB Atlas
-//hard coded db credentials, having problem with nodemon.js environment variables
+//hard coded db credentials, having problem with nodemon.js environment variables 
 mongoose.connect(
     "mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "rajluhmongoatlas" + "?retryWrites=true&w=majority",
   {
@@ -42,7 +42,7 @@ app.use("/messages", messagesRoutes);
 
 //invalid route and error handling
 app.use((req, res, next) => {
-  const error = new Error("Invalid route. Did you mean: GET messages/");
+  const error = new Error("Invalid route");
   error.status = 404;
   next(error);
 });
