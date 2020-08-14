@@ -1,11 +1,7 @@
 const mongoose = require("mongoose");
 const Message = require("../models/message");
 
-/**
- * TODO:
- * Update mongo functions to latest 
- * */
-
+// GET/messages/ controller
 const getAllMessages = (req, res, next) => {
   Message.find()
     .select("id text isPalindrome")
@@ -31,6 +27,7 @@ const getAllMessages = (req, res, next) => {
     });
 };
 
+// GET/messages/:messageId controller
 const getMessage = (req, res, next) => {
   const msgId = req.params.messageId;
   Message.findById(msgId)
@@ -52,6 +49,7 @@ const getMessage = (req, res, next) => {
     });
 };
 
+// POST/messages/ controller
 const createMessage = (req, res, next) => {
   if (req.body.text) {
     const message = new Message({
@@ -87,6 +85,7 @@ const createMessage = (req, res, next) => {
 
 };
 
+// PATCH/messages/:messageId controller
 const updateMessage = (req, res, next) => {
   //check if request body contains 'text' attribute
   if ( req.body.text ) {
@@ -113,6 +112,7 @@ const updateMessage = (req, res, next) => {
 
 };
 
+// DELETE/messages/:messageId controller
 const deleteMessage = (req, res, next) => {
   if (Message.exists({ _id: {$eq: req.params.messageId }})) {
     const msgId = req.params.messageId;
@@ -134,7 +134,7 @@ const deleteMessage = (req, res, next) => {
 
 }
 
-//Helper function to determin palindrome
+//Helper function to determine palindrome
 const isPalindrome = message => {
   const cleanMsg = message.toLowerCase().replace(/[\W_]/g, '');
   const msgChars = cleanMsg.split('');
