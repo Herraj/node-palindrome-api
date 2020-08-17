@@ -1,38 +1,45 @@
 const express = require("express");
 const messageRouter = express.Router();
-const MessagesController =  require('../controllers/messages.js');
- 
- /**
- * @api {get} /messages/ List all messages
- * @apiName Get All Messages
- * @apiGroup Messages
- *
- * @apiSuccess {Object} response object containing count and messages attributes
- * @apiSuccess {Number} Count Number of messages
- * @apiSuccess {Array} Messages Array of all messages
- * @apiSuccess {Number} _id unique message id genereated by MongoDB
- * @apiSuccess {String} text message string
- * @apiSuccess {boolean} isPalindrome  True or false if a message is a palindrome or not
- * 
- * @apiSuccessExample {json} Success Response Object
- * HTTP/1.1 200 OK
- * {
-    "count": 2,
-    "messages": [
+const MessagesController = require('../controllers/messages.js');
+const messageValidation = require('../validation/messageValidation');
+
+/**
+* @api {get} /messages/ List all messages
+* @apiName Get All Messages
+* @apiGroup Messages
+*
+* @apiSuccess {json} response object containing count and messages attributes
+* @apiSuccess {Number} Count Number of messages
+* @apiSuccess {Array} Messages Array of all messages
+* @apiSuccess {Number} _id unique message id genereated by MongoDB
+* @apiSuccess {String} text message string
+* @apiSuccess {boolean} isPalindrome  True or false if a message is a palindrome or not
+* @apiSuccess {Date} dateCreated date time when the message was created
+* @apiSuccess {Date} lastModified date time when the message was last modified  
+*
+* @apiSuccessExample {json} Success Response Object
+* HTTP/1.1 200 OK
+* {
+   "count": 2,
+   "messages": [
         {
-            "_id": "5f35cf51bab0d61138c201de",
-            "text": "random test pelo",
-            "isPalindrome": false
+            "_id": "5f3892af4edfa104d0c172cf",
+            "text": "cob",
+            "isPalindrome": false,
+            "dateCreated": "2020-08-16T01:58:07.000Z",
+            "lastModified": "2020-08-16T01:58:07.000Z"
         },
         {
-            "_id": "5f35e01459b1b32cf4895807",
-            "text": "sonos",
-            "isPalindrome": true
-        }
-    ]
-    }
- */
- messageRouter.get("/", MessagesController.getAllMessages);
+            "_id": "5f3895ba4d4168305406e2aa",
+            "text": "rotor",
+            "isPalindrome": true,
+            "dateCreated": "2020-08-16T02:11:06.755Z",
+            "lastModified": "2020-08-16T02:11:06.755Z"
+        },
+   ]
+   }
+*/
+messageRouter.get("/", MessagesController.getAllMessages);
 
 
 /**
@@ -41,23 +48,30 @@ const MessagesController =  require('../controllers/messages.js');
  * @apiGroup Messages
  *
  *
- * @apiSuccess {Object} response object containing message object
- * @apiSuccess {Object} message object containing details of message
+ * @apiSuccess {json} response object containing message object
+ * @apiSuccess {json} message object containing details of message
  * @apiSuccess {Number} _id unique id genereated by MongoDB
  * @apiSuccess {String} text message string
  * @apiSuccess {boolean} isPalindrome  True or false if a message is a palindrome or not
+ * @apiSuccess {Date} dateCreated date time when the message was created
+ * @apiSuccess {Date} lastModified date time when the message was last modified
  * 
  * @apiSuccessExample {json} Success Response Object
  * HTTP/1.1 200 OK
  * {
     "message": {
-        "_id": "5f35e2071be3d02e8c64b345",
-        "text": "rotor",
-        "isPalindrome": true
+        "_id": "5f38924b95feeb33689f65ac",
+        "text": "rob",
+        "isPalindrome": false,
+        "dateCreated": "2020-08-16T01:56:27.000Z",
+        "lastModified": "2020-08-16T01:56:27.000Z"
     }
     }
  */
- messageRouter.get("/:messageId", MessagesController.getMessage);
+messageRouter.get("/:messageId",
+    messageValidation.isValidMessageId,
+    messageValidation.messageExists,
+    MessagesController.getMessage);
 
 /**
  * @api {post} /messages/ Create new message 
@@ -66,24 +80,31 @@ const MessagesController =  require('../controllers/messages.js');
  *
  * @apiParam {String} text Message string
  *
- * @apiSuccess {Object} response object containing note attribute & message object
- * @apiSuccess {Object} message object containing details of message
+ * @apiSuccess {json} response object containing note attribute & message object
+ * @apiSuccess {json} message object containing details of message
  * @apiSuccess {Number} _id unique id genereated by MongoDB
  * @apiSuccess {String} text message string
  * @apiSuccess {boolean} isPalindrome True or false if a message is a palindrome or not
+ * @apiSuccess {Date} dateCreated date time when the message was created
+ * @apiSuccess {Date} lastModified date time when the message was last modified
  * 
  * @apiSuccessExample {json} Success Response Object
  * HTTP/1.1 201 OK
  *{
-    "note": "Message created",
+    "note": "Message successfully created:",
     "message": {
-        "_id": "5f363e34560760349c665a44",
-        "text": "Fifa",
-        "isPalindrome": false
+        "_id": "5f3ac3407b8ac837842af351",
+        "text": "sonos",
+        "isPalindrome": true,
+        "dateCreated": "2020-08-17T17:49:52.052Z",
+        "lastModified": "2020-08-17T17:49:52.052Z"
     }
     }   
  */
- messageRouter.post("/", MessagesController.createMessage);
+messageRouter.post("/",
+    messageValidation.isValidReqBody,
+    messageValidation.isDuplicateMessage,
+    MessagesController.createMessage);
 
 
 /**
@@ -98,30 +119,29 @@ const MessagesController =  require('../controllers/messages.js');
  * @apiSuccess {String} details url to updated message for details
  * 
  * @apiSuccessExample {json} Success Response Object
- * HTTP/1.1 200 OK
- *{
-    "note": "Message updated",
-    "details": "http://localhost:3000/messages/5f35e2081be3d02e8c64b346"} 
+ * HTTP/1.1 204 OK
  */
- messageRouter.patch("/:messageId", MessagesController.updateMessage);
+messageRouter.patch("/:messageId",
+    messageValidation.isValidMessageId,
+    messageValidation.isValidReqBody,
+    messageValidation.messageExists,
+    messageValidation.isDuplicateMessage,
+    MessagesController.updateMessage);
 
 
- /**
+/**
  * @api {delete} /messages/:messageId updates message with <messageId> 
  * @apiName Delete Message
  * @apiGroup Messages
  *
  * @apiParam {Number} _id Message id for to be deleted message
- *
- * @apiSuccess {Object} response object containing note attribute
- * @apiSuccess {String} note text showing api call result 
  * 
  * @apiSuccessExample {json} Success Response Object
- * HTTP/1.1 200 OK
- *{
-    "note": "Message updated",
-    "details": "http://localhost:3000/messages/5f35e2081be3d02e8c64b346"} 
+ * HTTP/1.1 204 OK
  */
- messageRouter.delete("/:messageId", MessagesController.deleteMessage);
+messageRouter.delete("/:messageId",
+    messageValidation.isValidMessageId,
+    messageValidation.messageExists,
+    MessagesController.deleteMessage);
 
 module.exports = messageRouter;
