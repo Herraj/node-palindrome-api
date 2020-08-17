@@ -122,7 +122,7 @@ const updateMessage = (req, res, next) => {
     })
     .exec()
     .then(result => {
-      res.status(204);
+      res.status(204).json();;
     })
     .catch(err => {
       console.log(err);
@@ -140,7 +140,7 @@ const deleteMessage = (req, res, next) => {
     })
     .exec()
     .then(result => {
-      res.status(204)
+      res.status(204).json();
     })
     .catch(err => {
       console.log(err);
