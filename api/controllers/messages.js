@@ -3,6 +3,7 @@ const Message = require("../models/message");
 
 // GET/messages/ controller
 const getAllMessages = (req, res, next) => {
+  // Setting up filter,sort,pagination options
   const defaultResultsLimit = 5;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || defaultResultsLimit;
@@ -19,6 +20,7 @@ const getAllMessages = (req, res, next) => {
     match.isPalindrome = req.query.isPalindrome === 'true'
   }
 
+  // Get all messages based on above options
   Message.find(match)
     .limit(limit)
     .skip(startIndex)
@@ -43,16 +45,16 @@ const getAllMessages = (req, res, next) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: err
+        error: "[GET/messages]Something went wrong trying to fetch from the database, try again."
       });
     });
 };
 
 // GET/messages/:messageId controller
 const getMessage = (req, res, next) => {
-  const msgId = req.params.messageId; //add validator method
+  const msgId = req.params.messageId;
   Message.findById(msgId)
-    .select("id text isPalindrome")
+    .select("id text isPalindrome dateCreated lastModified")
     .exec()
     .then(item => {
       console.log("Database query result: ", item);
@@ -62,115 +64,90 @@ const getMessage = (req, res, next) => {
         });
       } else {
         res.status(404).json({
-          note: "No entry found"
+          error: "[GET/messages/<id>] No message found with id: " + msgId
         });
       }
     })
     .catch(err => {
       console.log(err);
       res.status(400).json({
-        error: "Invalid Id"
+        error: "[GET/messages/<id>] Something went wrong while fetching message: " + msgId + " try again"
       });
     });
 };
 
 // POST/messages/ controller
 const createMessage = (req, res, next) => {
-  if (req.body.text) {
-    const message = new Message({
-      _id: new mongoose.Types.ObjectId(),
-      text: req.body.text,
-      isPalindrome: isPalindrome(req.body.text),
-      dateCreated: new Date,
-      lastModified: new Date
-    });
+  const message = new Message({
+    _id: new mongoose.Types.ObjectId(),
+    text: req.body.text,
+    isPalindrome: isPalindrome(req.body.text),
+    dateCreated: new Date,
+    lastModified: new Date
+  });
 
-    message.save().then(result => {
-        console.log(result);
-        res.status(201).json({
-          note: "Message created",
-          message: {
-            _id: result._id,
-            text: result.text,
-            isPalindrome: result.isPalindrome,
-            dateCreated: result.dateCreated,
-            lastModified: result.lastModified
-          }
-        })
+  message.save().then(result => {
+      console.log(result);
+      res.status(201).json({
+        note: "Message successfully created:",
+        message: {
+          _id: result._id,
+          text: result.text,
+          isPalindrome: result.isPalindrome,
+          dateCreated: result.dateCreated,
+          lastModified: result.lastModified
+        }
       })
-      .catch(err => {
-        console.log(err);
-        res.status(500).json({
-          error: err
-        });
-      });
-
-  } else {
-    res.status(400).json({
-      "Error": "No body with 'text' attribute"
     })
-
-  }
-
-
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: "[POST/messages]Something went wrong trying to save to the database, try again."
+      });
+    });
 };
 
 // PATCH/messages/:messageId controller
 const updateMessage = (req, res, next) => {
-  const id = req.params.messageId;
+  const msgId = req.params.messageId;
   const newText = req.body.text;
-  // ALSO UPDATE LAST UPDATED PROP
+
   Message.updateOne({
-      _id: id
+      _id: msgId
     }, {
       $set: {
-        text: newText
+        text: newText,
+        lastModified: new Date
       }
     })
     .exec()
     .then(result => {
-      res.status(200).json({
-        note: "Message updated",
-        details: "http://localhost:3000/messages/" + id
-      })
+      res.status(204);
     })
     .catch(err => {
-      console.log("yeeet" + err);
+      console.log(err);
       res.status(500).json({
-        error: err
+        error: "[PATCH/messages/<id>]Something went wrong while updating message: " + msgId + " try again."
       });
     });
 }
 
 // DELETE/messages/:messageId controller
 const deleteMessage = (req, res, next) => {
-  if (Message.exists({
-      _id: {
-        $eq: req.params.messageId
-      }
-    })) {
-    const msgId = req.params.messageId;
-    Message.remove({
-        _id: msgId
-      })
-      .exec()
-      .then(result => {
-        res.status(200).json({
-          note: "Message deleted"
-        });
-      })
-      .catch(err => {
-        console.log(err);
-        res.status(500).json({
-          error: err
-        });
+  const msgId = req.params.messageId;
+  Message.remove({
+      _id: msgId
+    })
+    .exec()
+    .then(result => {
+      res.status(204)
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: "[DELETE/messages/<id>]Something went wrong while deleting message: " + msgId + " try again."
       });
-  } else {
-    res.status(400).json({
-      error: "Message with id:" + req.params.messageId + "does not exist"
     });
-  }
-
 }
 
 //Helper function to determine palindrome
