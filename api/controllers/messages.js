@@ -3,8 +3,27 @@ const Message = require("../models/message");
 
 // GET/messages/ controller
 const getAllMessages = (req, res, next) => {
-  Message.find()
-    .select("id text isPalindrome")
+  const defaultResultsLimit = 5;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || defaultResultsLimit;
+  const startIndex = (page - 1) * limit
+  //const endIndex = page * limit
+  let match = {};
+  let sortBy = {};
+
+  if (req.query.order_by) {
+    sortBy.text = req.query.order_by === 'desc' ? -1 : 1;
+  }
+
+  if (req.query.isPalindrome) {
+    match.isPalindrome = req.query.isPalindrome === 'true'
+  }
+
+  Message.find(match)
+    .limit(limit)
+    .skip(startIndex)
+    .sort(sortBy)
+    .select("id text isPalindrome dateCreated lastModified")
     .exec()
     .then(items => {
       const response = {
@@ -13,7 +32,9 @@ const getAllMessages = (req, res, next) => {
           return {
             _id: item._id,
             text: item.text,
-            isPalindrome: item.isPalindrome
+            isPalindrome: item.isPalindrome,
+            dateCreated: item.dateCreated,
+            lastModified: item.lastModified
           };
         })
       };
@@ -29,7 +50,7 @@ const getAllMessages = (req, res, next) => {
 
 // GET/messages/:messageId controller
 const getMessage = (req, res, next) => {
-  const msgId = req.params.messageId;
+  const msgId = req.params.messageId; //add validator method
   Message.findById(msgId)
     .select("id text isPalindrome")
     .exec()
@@ -40,12 +61,16 @@ const getMessage = (req, res, next) => {
           message: item
         });
       } else {
-        res.status(404).json({ note: "No entry found" });
+        res.status(404).json({
+          note: "No entry found"
+        });
       }
     })
     .catch(err => {
       console.log(err);
-      res.status(400).json({ error: "Invalid Id" });
+      res.status(400).json({
+        error: "Invalid Id"
+      });
     });
 };
 
@@ -55,20 +80,24 @@ const createMessage = (req, res, next) => {
     const message = new Message({
       _id: new mongoose.Types.ObjectId(),
       text: req.body.text,
-      isPalindrome: isPalindrome(req.body.text)
+      isPalindrome: isPalindrome(req.body.text),
+      dateCreated: new Date,
+      lastModified: new Date
     });
 
     message.save().then(result => {
-      console.log(result);
-      res.status(201).json({
-        note: "Message created",
-        message: {
-          _id: result._id,
-          text: result.text,
-          isPalindrome: result.isPalindrome
-        }
+        console.log(result);
+        res.status(201).json({
+          note: "Message created",
+          message: {
+            _id: result._id,
+            text: result.text,
+            isPalindrome: result.isPalindrome,
+            dateCreated: result.dateCreated,
+            lastModified: result.lastModified
+          }
+        })
       })
-    })
       .catch(err => {
         console.log(err);
         res.status(500).json({
@@ -76,9 +105,10 @@ const createMessage = (req, res, next) => {
         });
       });
 
-  }
-  else {
-    res.status(400).json({ "Error": "No body with 'text' attribute" })
+  } else {
+    res.status(400).json({
+      "Error": "No body with 'text' attribute"
+    })
 
   }
 
@@ -87,36 +117,42 @@ const createMessage = (req, res, next) => {
 
 // PATCH/messages/:messageId controller
 const updateMessage = (req, res, next) => {
-  //check if request body contains 'text' attribute
-  if ( req.body.text ) {
-    const msgId = req.params.messageId;
-    const newText = req.body.text;
-
-    Message.updateOne({ _id: msgId }, { $set: { text: newText } })
-      .exec()
-      .then(result => {
-        res.status(200).json({
-          note: "Message updated",
-          details: "http://localhost:3000/messages/" + msgId
-        })
+  const id = req.params.messageId;
+  const newText = req.body.text;
+  // ALSO UPDATE LAST UPDATED PROP
+  Message.updateOne({
+      _id: id
+    }, {
+      $set: {
+        text: newText
+      }
+    })
+    .exec()
+    .then(result => {
+      res.status(200).json({
+        note: "Message updated",
+        details: "http://localhost:3000/messages/" + id
       })
-      .catch(err => {
-        console.log(err);
-        res.status(500).json({ error: err });
+    })
+    .catch(err => {
+      console.log("yeeet" + err);
+      res.status(500).json({
+        error: err
       });
-
-  }
-  else {
-    res.status(400).json({ "Error": "missing 'text' attribute in request body" });
-  }
-
-};
+    });
+}
 
 // DELETE/messages/:messageId controller
 const deleteMessage = (req, res, next) => {
-  if (Message.exists({ _id: {$eq: req.params.messageId }})) {
+  if (Message.exists({
+      _id: {
+        $eq: req.params.messageId
+      }
+    })) {
     const msgId = req.params.messageId;
-    Message.remove({ _id: msgId })
+    Message.remove({
+        _id: msgId
+      })
       .exec()
       .then(result => {
         res.status(200).json({
@@ -125,11 +161,14 @@ const deleteMessage = (req, res, next) => {
       })
       .catch(err => {
         console.log(err);
-        res.status(500).json({ error: err });
+        res.status(500).json({
+          error: err
+        });
       });
-  }
-  else {
-    res.status(400).json({ error: "Message with id:" + req.params.messageId + "does not exist" });
+  } else {
+    res.status(400).json({
+      error: "Message with id:" + req.params.messageId + "does not exist"
+    });
   }
 
 }
