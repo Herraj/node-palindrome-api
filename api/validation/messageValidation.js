@@ -6,7 +6,7 @@ const validMsgSchema = require('./validationSchema');
 const mongoose = require('mongoose');
 const Message = require("../models/message");
 
-
+//check if request body is valid for POST,PATCH
 const isValidReqBody = async (req, res, next) => {
     try {
         await validMsgSchema.validateAsync(req.body);
@@ -15,23 +15,27 @@ const isValidReqBody = async (req, res, next) => {
         console.log(err)
         if (err.isJoi) {
             return res.status(422).json({
-                "error": err.message
+                error: err.message
             });
-        } else return res.status(err.status).json(err);
+        } else {
+            return res.status(err.status).json(err);
+        }
     }
 
 }
 
+//check if :messageId is in valid format for GET,PATCH,DELETE
 const isValidMessageId = (req, res, next) => {
     if (mongoose.Types.ObjectId.isValid(req.params.messageId)) {
         next();
     } else {
         res.status(422).json({
-            "error": "Invalid message id bharwayyy"
+            error: "Invalid id format for messageId: " + req.params.messageId
         });
     }
 }
 
+//check if message exists in db for GET,PATCH,DELETE
 const messageExists = async (req, res, next) => {
     try {
         const docCount = await Message.collection.countDocuments({
@@ -41,17 +45,16 @@ const messageExists = async (req, res, next) => {
             next();
         } else {
             res.status(404).json({
-                "error": "Hai hi nahi gandu"
+                error: "Message does not exist with messageId: " + req.params.messageId
             });
         }
     } catch (err) {
         console.log(err)
-        res.status(err.status).json({
-            "error": err
-        })
+        res.status(err.status).json(err)
     }
 }
 
+//check if message already exists in db for POST/PATCH
 const isDuplicateMessage = async (req, res, next) => {
     try {
         const docCount = await Message.collection.countDocuments({
@@ -61,14 +64,12 @@ const isDuplicateMessage = async (req, res, next) => {
             next();
         } else {
             res.status(422).json({
-                "error": "Message string already exists"
+                error: "Message string already exists"
             });
         }
     } catch (err) {
         console.log(err)
-        res.status(err.status).json({
-            "error": err
-        })
+        res.status(err.status).json(err)
     }
 }
 
