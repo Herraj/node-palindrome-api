@@ -28,7 +28,7 @@ https://node-palindrome-restapi.herokuapp.com/messages
 
 
 ### Challenges faced 
-As a developer who has never worked with server side javascript (Nodejs) and NoSql database (MongoDB), this was a bit of a challenge but mainly due to learning and implementing at the same time. This was my first time building an app with NodeJS/MongoDB. Being a Java developer developer most of my career, I am very impressed by the NodeJs/Express/Mongo stack and how fast the development feels. I loved learning and working with MongoDB, it feels like a big Python dictionary but more powerful.
+As a developer who has never worked with server side javascript (Nodejs) and NoSql database (MongoDB), this was a bit of a challenge but mainly due to learning and implementing at the same time. This was my first time building an app with NodeJS/MongoDB. Being a Java developer most of my career, I am very impressed by the NodeJs/Express/Mongo stack and how fast the development feels. I loved learning and working with MongoDB, it feels like a big Python dictionary but more powerful.
  
 ### Final thoughts and improvements
 Here are some key improvements I unfortunately could not make due to technical issues and time constraints:
