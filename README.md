@@ -24,7 +24,7 @@ https://node-palindrome-restapi.herokuapp.com/messages
 * Testing & validation (joi, mocha, chai)
 
 ### App architecture overview 
-[App architecture](https://imgur.com/TRa6EfC)
+[App architecture](https://drive.google.com/file/d/1qGOM8h0kuv2IH-Ev90sSUxDChIDHT6XR/view?usp=sharing)
 
 
 ### Challenges faced 
