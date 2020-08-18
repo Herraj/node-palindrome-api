@@ -89,7 +89,7 @@ const createMessage = (req, res, next) => {
   message.save().then(result => {
       console.log(result);
       res.status(201).json({
-        note: "Message successfully created:",
+        note: "Message successfully created",
         message: {
           _id: result._id,
           text: result.text,
@@ -169,3 +169,4 @@ exports.getMessage = getMessage;
 exports.createMessage = createMessage;
 exports.updateMessage = updateMessage;
 exports.deleteMessage = deleteMessage;
+exports.isPalindrome = isPalindrome;

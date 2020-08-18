@@ -14,8 +14,6 @@ mongoose.connect(
     useUnifiedTopology: true
   }
 );
-//need this to access mongoose in other files (gloabl scope)
-mongoose.Promise = global.Promise;
 
 //configuring logger and bodyparser 
 app.use(logger("dev"));

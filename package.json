@@ -4,7 +4,7 @@
   "description": "Simple Restful API to manage palindrom strings",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit",
+    "test": "mocha --recursive --exit",
     "start": "nodemon server.js"
   },
   "repository": {
@@ -28,6 +28,7 @@
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "mocha": "^8.1.1",
+    "node-mocks-http": "^1.8.1",
     "nodemon": "^2.0.4",
     "typescript": "^3.9.7"
   }
