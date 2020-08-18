@@ -9,18 +9,17 @@ const messagesRoutes = require("./api/routes/messages");
 //set up db connection to MongoDB Atlas
 //hard coded db credentials, having problem with nodemon.js environment variables 
 mongoose.connect(
-    "mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "rajluhmongoatlas" + "?retryWrites=true&w=majority",
-  {
-    useNewUrlParser :true,
+  "mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "dev_db" + "?retryWrites=true&w=majority", {
+    useNewUrlParser: true,
     useUnifiedTopology: true
   }
 );
-//need this to access mongoose in other files (gloabl scope)
-mongoose.Promise = global.Promise;
 
 //configuring logger and bodyparser 
 app.use(logger("dev"));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(bodyParser.json());
 
 //Allow access via browsers (fix for CORS error) 

@@ -3,8 +3,29 @@ const Message = require("../models/message");
 
 // GET/messages/ controller
 const getAllMessages = (req, res, next) => {
-  Message.find()
-    .select("id text isPalindrome")
+  // Setting up filter,sort,pagination options
+  const defaultResultsLimit = 5;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || defaultResultsLimit;
+  const startIndex = (page - 1) * limit
+  //const endIndex = page * limit
+  let match = {};
+  let sortBy = {};
+
+  if (req.query.order_by) {
+    sortBy.text = req.query.order_by === 'desc' ? -1 : 1;
+  }
+
+  if (req.query.isPalindrome) {
+    match.isPalindrome = req.query.isPalindrome === 'true'
+  }
+
+  // Get all messages based on above options
+  Message.find(match)
+    .limit(limit)
+    .skip(startIndex)
+    .sort(sortBy)
+    .select("id text isPalindrome dateCreated lastModified")
     .exec()
     .then(items => {
       const response = {
@@ -13,7 +34,9 @@ const getAllMessages = (req, res, next) => {
           return {
             _id: item._id,
             text: item.text,
-            isPalindrome: item.isPalindrome
+            isPalindrome: item.isPalindrome,
+            dateCreated: item.dateCreated,
+            lastModified: item.lastModified
           };
         })
       };
@@ -22,7 +45,7 @@ const getAllMessages = (req, res, next) => {
     .catch(err => {
       console.log(err);
       res.status(500).json({
-        error: err
+        error: "[GET/messages]Something went wrong trying to fetch from the database, try again."
       });
     });
 };
@@ -31,7 +54,7 @@ const getAllMessages = (req, res, next) => {
 const getMessage = (req, res, next) => {
   const msgId = req.params.messageId;
   Message.findById(msgId)
-    .select("id text isPalindrome")
+    .select("id text isPalindrome dateCreated lastModified")
     .exec()
     .then(item => {
       console.log("Database query result: ", item);
@@ -40,98 +63,91 @@ const getMessage = (req, res, next) => {
           message: item
         });
       } else {
-        res.status(404).json({ note: "No entry found" });
+        res.status(404).json({
+          error: "[GET/messages/<id>] No message found with id: " + msgId
+        });
       }
     })
     .catch(err => {
       console.log(err);
-      res.status(400).json({ error: "Invalid Id" });
+      res.status(400).json({
+        error: "[GET/messages/<id>] Something went wrong while fetching message: " + msgId + " try again"
+      });
     });
 };
 
 // POST/messages/ controller
 const createMessage = (req, res, next) => {
-  if (req.body.text) {
-    const message = new Message({
-      _id: new mongoose.Types.ObjectId(),
-      text: req.body.text,
-      isPalindrome: isPalindrome(req.body.text)
-    });
+  const message = new Message({
+    _id: new mongoose.Types.ObjectId(),
+    text: req.body.text,
+    isPalindrome: isPalindrome(req.body.text),
+    dateCreated: new Date,
+    lastModified: new Date
+  });
 
-    message.save().then(result => {
+  message.save().then(result => {
       console.log(result);
       res.status(201).json({
-        note: "Message created",
+        note: "Message successfully created",
         message: {
           _id: result._id,
           text: result.text,
-          isPalindrome: result.isPalindrome
+          isPalindrome: result.isPalindrome,
+          dateCreated: result.dateCreated,
+          lastModified: result.lastModified
         }
       })
     })
-      .catch(err => {
-        console.log(err);
-        res.status(500).json({
-          error: err
-        });
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: "[POST/messages]Something went wrong trying to save to the database, try again."
       });
-
-  }
-  else {
-    res.status(400).json({ "Error": "No body with 'text' attribute" })
-
-  }
-
-
+    });
 };
 
 // PATCH/messages/:messageId controller
 const updateMessage = (req, res, next) => {
-  //check if request body contains 'text' attribute
-  if ( req.body.text ) {
-    const msgId = req.params.messageId;
-    const newText = req.body.text;
+  const msgId = req.params.messageId;
+  const newText = req.body.text;
 
-    Message.updateOne({ _id: msgId }, { $set: { text: newText } })
-      .exec()
-      .then(result => {
-        res.status(200).json({
-          note: "Message updated",
-          details: "http://localhost:3000/messages/" + msgId
-        })
-      })
-      .catch(err => {
-        console.log(err);
-        res.status(500).json({ error: err });
+  Message.updateOne({
+      _id: msgId
+    }, {
+      $set: {
+        text: newText,
+        lastModified: new Date
+      }
+    })
+    .exec()
+    .then(result => {
+      res.status(204).json();;
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: "[PATCH/messages/<id>]Something went wrong while updating message: " + msgId + " try again."
       });
-
-  }
-  else {
-    res.status(400).json({ "Error": "missing 'text' attribute in request body" });
-  }
-
-};
+    });
+}
 
 // DELETE/messages/:messageId controller
 const deleteMessage = (req, res, next) => {
-  if (Message.exists({ _id: {$eq: req.params.messageId }})) {
-    const msgId = req.params.messageId;
-    Message.remove({ _id: msgId })
-      .exec()
-      .then(result => {
-        res.status(200).json({
-          note: "Message deleted"
-        });
-      })
-      .catch(err => {
-        console.log(err);
-        res.status(500).json({ error: err });
+  const msgId = req.params.messageId;
+  Message.remove({
+      _id: msgId
+    })
+    .exec()
+    .then(result => {
+      res.status(204).json();
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: "[DELETE/messages/<id>]Something went wrong while deleting message: " + msgId + " try again."
       });
-  }
-  else {
-    res.status(400).json({ error: "Message with id:" + req.params.messageId + "does not exist" });
-  }
-
+    });
 }
 
 //Helper function to determine palindrome
@@ -153,3 +169,4 @@ exports.getMessage = getMessage;
 exports.createMessage = createMessage;
 exports.updateMessage = updateMessage;
 exports.deleteMessage = deleteMessage;
+exports.isPalindrome = isPalindrome;
