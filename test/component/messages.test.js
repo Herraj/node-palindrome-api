@@ -1,8 +1,8 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const app = require('../app');
+const app = require('../../app');
 const mongoose = require('mongoose');
-const messageSchema = require('../api/schemas/message');
+const messageSchema = require('../../api/schemas/message');
 
 chai.use(chaiHttp);
 //Assertion style
@@ -15,11 +15,12 @@ let Message;
 before(async () => {
     try {
         // override default mongoose connection with test_db
-        await mongoose.connect("mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "test_db" + "?retryWrites=true&w=majority", {
+        mongoose.connect("mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "test_db" + "?retryWrites=true&w=majority", {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
 
+        // creating a new connection to test_db besides the default connection 
         dbcon = mongoose.createConnection("mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "test_db" + "?retryWrites=true&w=majority", {
             useNewUrlParser: true,
             useUnifiedTopology: true
@@ -57,7 +58,7 @@ before(async () => {
     } catch (err) {
         console.log(err);
     }
-
+    //done();
 });
 
 
@@ -70,6 +71,7 @@ after(async () => {
     } catch (err) {
         console.log(err);
     }
+    //done();
 });
 
 
