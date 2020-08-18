@@ -169,3 +169,4 @@ exports.getMessage = getMessage;
 exports.createMessage = createMessage;
 exports.updateMessage = updateMessage;
 exports.deleteMessage = deleteMessage;
+exports.isPalindrome = isPalindrome;
