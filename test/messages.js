@@ -8,83 +8,68 @@ chai.use(chaiHttp);
 //Assertion style
 chai.should();
 
-// override default mongoose connection with test_db
-mongoose.connect("mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "test_db" + "?retryWrites=true&w=majority", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
-
 // create new connection to test_db
-const dbcon = mongoose.createConnection("mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "test_db" + "?retryWrites=true&w=majority", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+let dbcon;
+let Message;
 
-// create new model for the new connection above
-const Message = dbcon.model('Message', messageSchema);
+before(async () => {
+    try {
+        // override default mongoose connection with test_db
+        await mongoose.connect("mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "test_db" + "?retryWrites=true&w=majority", {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
 
+        dbcon = mongoose.createConnection("mongodb+srv://hluhano:" + "hluhano55" + "@rajluhmongoatlas.9uqz3.mongodb.net/" + "test_db" + "?retryWrites=true&w=majority", {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
 
-before((done) => {
-    // Message.remove({}).then(result => {
-    //     console.log("emptied collection")
-    // }).catch(err => {
-    //     console.log(err);
-    // })
+        // create new model for the new connection above
+        Message = dbcon.model('Message', messageSchema);
 
-    const testGetMsg = new Message({
-        _id: mongoose.Types.ObjectId('5f3ad8721ae0b50ebd95633f'),
-        text: "testGet",
-        isPalindrome: false,
-        dateCreated: new Date,
-        lastModified: new Date
-    });
+        const testGetMsg = new Message({
+            _id: mongoose.Types.ObjectId('5f3ad8721ae0b50ebd95633f'),
+            text: "testGet",
+            isPalindrome: false,
+            dateCreated: new Date,
+            lastModified: new Date
+        });
 
-    const testPatchMsg = new Message({
-        _id: mongoose.Types.ObjectId('5f3ade1f1ae0b50ebd956340'),
-        text: "testPatch",
-        isPalindrome: false,
-        dateCreated: new Date,
-        lastModified: new Date
-    });
+        const testPatchMsg = new Message({
+            _id: mongoose.Types.ObjectId('5f3ade1f1ae0b50ebd956340'),
+            text: "testPatch",
+            isPalindrome: false,
+            dateCreated: new Date,
+            lastModified: new Date
+        });
 
-    const testDeleteMsg = new Message({
-        _id: mongoose.Types.ObjectId('5f3ae0ee1ae0b50ebd956341'),
-        text: "testDel",
-        isPalindrome: false,
-        dateCreated: new Date,
-        lastModified: new Date
-    });
+        const testDeleteMsg = new Message({
+            _id: mongoose.Types.ObjectId('5f3ae0ee1ae0b50ebd956341'),
+            text: "testDel",
+            isPalindrome: false,
+            dateCreated: new Date,
+            lastModified: new Date
+        });
 
-    Message.insertMany([testGetMsg, testPatchMsg, testDeleteMsg]).then(result => {
-        console.log("Db seed successful");
-    }).catch(err => {
+        await Message.insertMany([testGetMsg, testPatchMsg, testDeleteMsg]);
+
+    } catch (err) {
         console.log(err);
-    });
+    }
 
-    done();
 });
 
 
 after(async () => {
     try {
         await Message.remove({});
+        dbcon.close()
+        mongoose.disconnect();
 
     } catch (err) {
         console.log(err);
     }
-    // Message.remove({}).then(result => {
-
-    // }).catch(err => {
-    //     console.log(err);
-    // });
-
-    dbcon.close().then(result => {
-        console.log('Connection close');
-    }).catch(err => {
-        console.log(err);
-    });
-
-    mongoose.disconnect();
 });
 
 
