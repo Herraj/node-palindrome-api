@@ -34,9 +34,9 @@ As a developer who has never worked with server side javascript (Nodejs) and NoS
 Here are some key improvements I unfortunately could not make due to technical issues and time constraints:
 * Creating a Docker image. Since I was developing on a Windows 10 Home edition, installation and configuration of Docker was a bit time consuming and tedius. 
 * User authentication via JWT
-* Caching (to address future performance/scaling issues)
 * Set up .env file for environment variables for different environments (i.e production, development)
 * Unit testing of Controller functions via Mocking libraries
 * Custom error class
+* Flaky end point tests
 
 
