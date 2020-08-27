@@ -26,8 +26,11 @@ https://node-palindrome-restapi.herokuapp.com/messages
 ### App architecture overview 
 [App architecture](https://drive.google.com/file/d/1qGOM8h0kuv2IH-Ev90sSUxDChIDHT6XR/view?usp=sharing)
  
-### Final thoughts and improvements
-Here are some key improvements I unfortunately could not make due to technical issues and time constraints:
+### Improvements & bug fixes(currently being worked on)
+* Fix PATCH request not updating isPalindrome boolean
+* Fix pagination to show 'next page' link
+* Sanitize for string numbers
+* Sanitzie query params
 * Creating a Docker image. Since I was developing on a Windows 10 Home edition, installation and configuration of Docker was a bit time consuming and tedius. 
 * User authentication via JWT
 * Set up .env file for environment variables for different environments (i.e production, development)
